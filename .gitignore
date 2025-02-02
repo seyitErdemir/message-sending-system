@@ -5,13 +5,10 @@
 *.dll
 *.so
 *.dylib
-*.test
 *.out
 
 # Environment files
 .env
-.env.*
-!.env.example
 
 # IDE specific files
 .idea/
