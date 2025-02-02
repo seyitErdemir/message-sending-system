@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fiber-app/pkg/cache"
 	"fiber-app/pkg/database"
 	"fiber-app/pkg/models"
 	"log"
@@ -9,48 +10,42 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// CreateMessageRequest represents the request body for creating a message
 type CreateMessageRequest struct {
-	Content string `json:"content" example:"Merhaba, siparişiniz hazırlanıyor."` // Mesaj içeriği
-	Phone   string `json:"phone" example:"+905551234567"`                        // Telefon numarası
+	Content string `json:"content" example:"Hello, your order is being prepared."`
+	Phone   string `json:"phone" example:"+905551234567"`
 }
 
-// SuccessResponse represents the success response structure
 type SuccessResponse struct {
-	Status string      `json:"status" example:"success"` // İşlem durumu
-	Data   interface{} `json:"data"`                     // Yanıt verisi
+	Status string      `json:"status" example:"success"`
+	Data   interface{} `json:"data"`
 }
 
-// ErrorResponse represents the error response structure
 type ErrorResponse struct {
-	Status  string `json:"status" example:"failed"`                    // İşlem durumu
-	Message string `json:"message" example:"Content alanı zorunludur"` // Hata mesajı
-	Code    string `json:"code,omitempty" example:"CONTENT_REQUIRED"`  // Hata kodu
+	Status  string `json:"status" example:"failed"`
+	Message string `json:"message" example:"Content field required"`
+	Code    string `json:"code,omitempty" example:"CONTENT_REQUIRED"`
 }
 
-// MessageResponse represents a single message response
 type MessageResponse struct {
-	Status string         `json:"status" example:"success"` // İşlem durumu
-	Data   models.Message `json:"data"`                     // Mesaj verisi
+	Status string         `json:"status" example:"success"`
+	Data   models.Message `json:"data"`
 }
 
-// MessagesResponse represents multiple messages response
 type MessagesResponse struct {
-	Status string           `json:"status" example:"success"` // İşlem durumu
-	Data   []models.Message `json:"data"`                     // Mesaj listesi
+	Status string           `json:"status" example:"success"`
+	Data   []models.Message `json:"data"`
 }
 
-// Telefon numarası formatı kontrolü için regex
 var phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,15}$`)
 
-// @Summary Yeni mesaj oluştur
-// @Description Yeni bir mesaj oluşturur ve veritabanına kaydeder
+// @Summary Create new message
+// @Description Creates a new message and saves it to the database
 // @Tags messages
 // @Accept json
 // @Produce json
-// @Param message body CreateMessageRequest true "Mesaj bilgileri"
-// @Success 201 {object} MessageResponse "Başarılı yanıt"
-// @Failure 400 {object} ErrorResponse "Geçersiz istek"
+// @Param message body CreateMessageRequest true "Message information"
+// @Success 201 {object} MessageResponse "Successful response"
+// @Failure 400 {object} ErrorResponse "Invalid request"
 // @Router /messages [post]
 func CreateMessage(c *fiber.Ctx) error {
 	var request CreateMessageRequest
@@ -59,7 +54,7 @@ func CreateMessage(c *fiber.Ctx) error {
 		log.Printf("Error parsing request: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "JSON formatı geçersiz",
+			Message: "Invalid JSON format",
 			Code:    "INVALID_JSON",
 		})
 	}
@@ -71,16 +66,16 @@ func CreateMessage(c *fiber.Ctx) error {
 	if request.Content == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Content alanı zorunludur",
+			Message: "Content field is required",
 			Code:    "CONTENT_REQUIRED",
 		})
 	}
 
-	// Content karakter limiti kontrolü
+	// Content character limit check
 	if len(request.Content) > 120 {
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Content alanı maksimum 120 karakter olabilir",
+			Message: "Content field cannot exceed 120 characters",
 			Code:    "CONTENT_TOO_LONG",
 		})
 	}
@@ -88,25 +83,25 @@ func CreateMessage(c *fiber.Ctx) error {
 	if request.Phone == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Phone alanı zorunludur",
+			Message: "Phone field is required",
 			Code:    "PHONE_REQUIRED",
 		})
 	}
 
-	// Telefon numarası format kontrolü
+	// Phone number format validation
 	if !phoneRegex.MatchString(request.Phone) {
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Geçersiz telefon numarası formatı. Örnek: +905551234567 veya 5551234567",
+			Message: "Invalid phone number format. Example: +905551234567 or 5551234567",
 			Code:    "INVALID_PHONE_FORMAT",
 		})
 	}
 
-	// Telefon numarası uzunluk kontrolü
+	// Phone number length check
 	if len(request.Phone) > 15 {
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Telefon numarası 15 karakterden uzun olamaz",
+			Message: "Phone number cannot exceed 15 characters",
 			Code:    "PHONE_TOO_LONG",
 		})
 	}
@@ -126,7 +121,7 @@ func CreateMessage(c *fiber.Ctx) error {
 		log.Printf("Error creating message: %v", result.Error)
 		return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Geçersiz veri formatı. Lütfen girdiğiniz bilgileri kontrol edin",
+			Message: "Invalid data format. Please check your input",
 			Code:    "VALIDATION_ERROR",
 		})
 	}
@@ -140,24 +135,59 @@ func CreateMessage(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary Tüm mesajları getir
-// @Description Veritabanındaki tüm mesajları getirir
+// @Summary Get all sent messages
+// @Description Retrieves messages from database where status is true (sent)
 // @Tags messages
 // @Accept json
 // @Produce json
-// @Success 200 {object} MessagesResponse "Başarılı yanıt"
-// @Failure 500 {object} ErrorResponse "Sunucu hatası"
+// @Success 200 {object} MessagesResponse "Successful response"
+// @Failure 500 {object} ErrorResponse "Server error"
 // @Router /messages [get]
 func GetMessages(c *fiber.Ctx) error {
 	var messages []models.Message
 
-	result := database.DB.Find(&messages)
+	// Try from cache first
+	cachedMessages, err := cache.GetMessageCacheWithTimeout(0) // 0 is special key for all messages
+	if err != nil {
+		log.Printf("Cache error: %v", err)
+	} else if cachedMessages != nil {
+		// Convert cache data to models.Message
+		message := models.Message{
+			ID:      cachedMessages.ID,
+			Content: cachedMessages.Content,
+			Phone:   cachedMessages.Phone,
+			Status:  cachedMessages.Status,
+		}
+		return c.JSON(MessagesResponse{
+			Status: "success",
+			Data:   []models.Message{message},
+		})
+	}
+
+	// If not in cache or error occurred, get from database
+	result := database.DB.Where("status = ?", true).Find(&messages)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(ErrorResponse{
 			Status:  "failed",
-			Message: "Mesajlar getirilemedi",
+			Message: "Failed to retrieve messages",
 			Code:    "DATABASE_ERROR",
 		})
+	}
+
+	// Save successful result to cache
+	if len(messages) > 0 {
+		go func() {
+			// Save first message to cache
+			cacheData := cache.MessageCache{
+				ID:      messages[0].ID,
+				Content: messages[0].Content,
+				Phone:   messages[0].Phone,
+				Status:  messages[0].Status,
+			}
+			if err := cache.SetMessageCache(0, cacheData); err != nil {
+				log.Printf("Cache set error: %v", err)
+			}
+		}()
 	}
 
 	return c.JSON(MessagesResponse{

@@ -70,11 +70,11 @@ func Connect() error {
 
 	// Insert default messages
 	defaultMessages := []models.Message{
-		{Content: "Merhaba! Size nasıl yardımcı olabilirim?", Phone: "+905551234567", Status: false},
-		{Content: "İyi günler, siparişiniz hazırlanıyor.", Phone: "+905551234568", Status: false},
-		{Content: "Siparişiniz yola çıktı, yakında size ulaşacak.", Phone: "+905551234569", Status: false},
-		{Content: "Kampanyalarımızdan haberdar olmak ister misiniz?", Phone: "+905551234570", Status: false},
-		{Content: "Size özel indirim fırsatları için profilinizi güncelleyin.", Phone: "+905551234571", Status: false},
+		{Content: "Hello! How can I help you?", Phone: "+905551234567", Status: false},
+		{Content: "Good day, your order is being prepared.", Phone: "+905551234568", Status: false},
+		{Content: "Your order has been shipped, it will arrive soon.", Phone: "+905551234569", Status: false},
+		{Content: "Would you like to be informed about our campaigns?", Phone: "+905551234570", Status: false},
+		{Content: "Update your profile for exclusive discount opportunities.", Phone: "+905551234571", Status: false},
 	}
 
 	if err := DB.Create(&defaultMessages).Error; err != nil {

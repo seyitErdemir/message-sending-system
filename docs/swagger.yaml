@@ -3,60 +3,60 @@ definitions:
   handlers.CreateMessageRequest:
     properties:
       content:
-        description: Mesaj içeriği
-        example: Merhaba, siparişiniz hazırlanıyor.
+        description: Message content
+        example: Hello, your order is being prepared.
         type: string
       phone:
-        description: Telefon numarası
+        description: Phone number
         example: "+905551234567"
         type: string
     type: object
   handlers.CronLogsResponse:
     properties:
       data:
-        description: Cron logları
+        description: Cron logs
         items:
           $ref: '#/definitions/models.CronLog'
         type: array
       status:
-        description: İşlem durumu
+        description: Operation status
         example: success
         type: string
     type: object
   handlers.CronMessageResponse:
     properties:
       message:
-        description: İşlem mesajı
-        example: Cron başlatıldı
+        description: Operation message
+        example: Cron started
         type: string
       status:
-        description: İşlem durumu
+        description: Operation status
         example: success
         type: string
     type: object
   handlers.CronStatusResponse:
     properties:
       is_running:
-        description: Cron job çalışma durumu
+        description: Cron job running status
         example: true
         type: boolean
       status:
-        description: İşlem durumu
+        description: Operation status
         example: success
         type: string
     type: object
   handlers.ErrorResponse:
     properties:
       code:
-        description: Hata kodu
+        description: Error code
         example: CONTENT_REQUIRED
         type: string
       message:
-        description: Hata mesajı
-        example: Content alanı zorunludur
+        description: Error message
+        example: Content field required
         type: string
       status:
-        description: İşlem durumu
+        description: Operation status
         example: failed
         type: string
     type: object
@@ -65,21 +65,21 @@ definitions:
       data:
         allOf:
         - $ref: '#/definitions/models.Message'
-        description: Mesaj verisi
+        description: Message data
       status:
-        description: İşlem durumu
+        description: Operation status
         example: success
         type: string
     type: object
   handlers.MessagesResponse:
     properties:
       data:
-        description: Mesaj listesi
+        description: Message list
         items:
           $ref: '#/definitions/models.Message'
         type: array
       status:
-        description: İşlem durumu
+        description: Operation status
         example: success
         type: string
     type: object
@@ -125,7 +125,7 @@ info:
   contact:
     email: destek@example.com
     name: API Destek
-  description: Bu API, mesaj gönderme ve yönetme işlemleri için kullanılır.
+  description: This API is used for message sending and management operations.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -137,95 +137,95 @@ paths:
     get:
       consumes:
       - application/json
-      description: Cron job'ın çalışma loglarını getirir
+      description: Retrieves the cron job execution logs
       produces:
       - application/json
       responses:
         "200":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.CronLogsResponse'
         "500":
-          description: Sunucu hatası
+          description: Server error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Cron loglarını getir
+      summary: Get cron logs
       tags:
       - cron
   /cron/start:
     post:
       consumes:
       - application/json
-      description: Mesaj gönderme cron job'ını başlatır
+      description: Starts the message sending cron job
       produces:
       - application/json
       responses:
         "200":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.CronMessageResponse'
         "500":
-          description: Sunucu hatası
+          description: Server error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Cron job'ı başlat
+      summary: Start cron job
       tags:
       - cron
   /cron/status:
     get:
       consumes:
       - application/json
-      description: Cron job'ın çalışıp çalışmadığını kontrol eder
+      description: Checks if the cron job is running
       produces:
       - application/json
       responses:
         "200":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.CronStatusResponse'
-      summary: Cron job durumunu getir
+      summary: Get cron job status
       tags:
       - cron
   /cron/stop:
     post:
       consumes:
       - application/json
-      description: Mesaj gönderme cron job'ını durdurur
+      description: Stops the message sending cron job
       produces:
       - application/json
       responses:
         "200":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.CronMessageResponse'
-      summary: Cron job'ı durdur
+      summary: Stop cron job
       tags:
       - cron
   /messages:
     get:
       consumes:
       - application/json
-      description: Veritabanındaki tüm mesajları getirir
+      description: Retrieves messages from database where status is true (sent)
       produces:
       - application/json
       responses:
         "200":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.MessagesResponse'
         "500":
-          description: Sunucu hatası
+          description: Server error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Tüm mesajları getir
+      summary: Get all sent messages
       tags:
       - messages
     post:
       consumes:
       - application/json
-      description: Yeni bir mesaj oluşturur ve veritabanına kaydeder
+      description: Creates a new message and saves it to the database
       parameters:
-      - description: Mesaj bilgileri
+      - description: Message information
         in: body
         name: message
         required: true
@@ -235,14 +235,14 @@ paths:
       - application/json
       responses:
         "201":
-          description: Başarılı yanıt
+          description: Successful response
           schema:
             $ref: '#/definitions/handlers.MessageResponse'
         "400":
-          description: Geçersiz istek
+          description: Invalid request
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Yeni mesaj oluştur
+      summary: Create new message
       tags:
       - messages
 swagger: "2.0"

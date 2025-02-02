@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fiber-app/pkg/cache"
 	"fiber-app/pkg/database"
+	"fiber-app/pkg/errors"
 	"fiber-app/pkg/models"
 	"fmt"
 	"io"
@@ -62,18 +63,19 @@ func logCronOperation(operation string, messageIDs []uint, count int, status boo
 func updateInactiveMessages() {
 	var messages []models.Message
 
-	// Her çalışmada sadece 2 mesaj işle
 	batchSize := 2
 
-	// Sadece 2 tane işlenmemiş mesajı al
 	result := database.DB.Where("status = ?", false).Order("created_at asc").Limit(batchSize).Find(&messages)
 	if result.Error != nil {
-		log.Printf("Error fetching inactive messages: %v", result.Error)
+		err := errors.NewDatabaseError("Error fetching inactive messages", result.Error)
+		errors.LogError(err)
 		return
 	}
 
 	if len(messages) == 0 {
 		log.Println("No inactive messages found")
+		logCronOperation("NO_MESSAGES", nil, 0, true, "No inactive messages found, stopping cron")
+		StopCron()
 		return
 	}
 
@@ -93,12 +95,19 @@ func updateInactiveMessages() {
 
 		jsonData, err := json.Marshal(requestBody)
 		if err != nil {
-			log.Fatalf("Error marshaling request: %v", err)
+			err = errors.NewWebhookError("Error marshaling request", err).
+				WithMetadata("messageId", message.ID)
+			errors.LogError(err)
+			continue
 		}
 
 		req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer(jsonData))
 		if err != nil {
-			log.Fatalf("Error creating request: %v", err)
+			err = errors.NewWebhookError("Error creating request", err).
+				WithMetadata("messageId", message.ID).
+				WithMetadata("webhookURL", webhookURL)
+			errors.LogError(err)
+			continue
 		}
 
 		req.Header.Add("Content-Type", "application/json")
@@ -108,60 +117,84 @@ func updateInactiveMessages() {
 		}
 		req.Header.Add("x-ins-auth-key", authKey)
 
-		// Debug için request body'yi oku ve tekrar oluştur
+		// Debug: Read and recreate request body
 		bodyBytes, _ := io.ReadAll(req.Body)
 		fmt.Println("Request Body:", string(bodyBytes))
-		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // Tekrar oluştur
+		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-		fmt.Println("*************************************************")
+		fmt.Println("*************************************************") // Debug
 		fmt.Println(req)
-		fmt.Println("*************************************************")
+		fmt.Println("*************************************************") // Debug
 
-		// IP'den banlandığı için servis isteği iptal edildi
+		// Service request cancelled due to IP ban
+		// Real service implementation
 		/*
 			client := &http.Client{
 				Timeout: 10 * time.Second,
 			}
 			resp, err := client.Do(req)
 			if err != nil {
-				log.Fatalf("Error sending request: %v", err)
+				err = errors.NewWebhookError("Error sending request", err).
+					WithMetadata("messageId", message.ID).
+					WithMetadata("webhookURL", webhookURL)
+				errors.LogError(err)
+				logCronOperation("WEBHOOK_REQUEST", []uint{message.ID}, 1, false, fmt.Sprintf("Request failed: %v", err))
+				continue
 			}
 			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				err = errors.NewWebhookError("Webhook request failed", fmt.Errorf("status code: %d", resp.StatusCode)).
+					WithMetadata("messageId", message.ID).
+					WithMetadata("statusCode", resp.StatusCode)
+				errors.LogError(err)
+				logCronOperation("WEBHOOK_RESPONSE", []uint{message.ID}, 1, false, fmt.Sprintf("Response status not OK: %d", resp.StatusCode))
+				continue
+			}
+
+			var response WebhookResponse
+			if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+				err = errors.NewWebhookError("Error decoding response", err).
+					WithMetadata("messageId", message.ID)
+				errors.LogError(err)
+				logCronOperation("WEBHOOK_RESPONSE", []uint{message.ID}, 1, false, fmt.Sprintf("Response decode failed: %v", err))
+				continue
+			}
 		*/
 
-		// Simüle edilmiş başarılı yanıt
+		// Simulated successful response
 		simulatedResponse := WebhookResponse{
 			Message:   "Message sent successfully",
 			MessageID: fmt.Sprintf("SIMULATED_MSG_%d_%d", message.ID, time.Now().Unix()),
 		}
 		simulatedResponseBytes, _ := json.Marshal(simulatedResponse)
 
-		// HTTP Yanıtı Debug
+		// Debug HTTP Response
 		fmt.Println("Response Status: 200 OK (Simulated)")
 		fmt.Println("Response Body:", string(simulatedResponseBytes))
 
 		log.Printf("Response for message %d - Status: 200 OK, Body: %s", message.ID, string(simulatedResponseBytes))
 
-		// Parse the simulated response
 		var response WebhookResponse
 		if err := json.Unmarshal(simulatedResponseBytes, &response); err != nil {
-			log.Printf("Error decoding response for message %d: %v", message.ID, err)
+			err = errors.NewWebhookError("Error decoding response", err).
+				WithMetadata("messageId", message.ID)
+			errors.LogError(err)
 			logCronOperation("WEBHOOK_RESPONSE", []uint{message.ID}, 1, false, fmt.Sprintf("Response decode failed: %v", err))
 			continue
 		}
 
-		log.Printf("Response for message %d: %+v", message.ID, response)
-
-		// Always update as successful
 		message.Status = true
 		message.MessageID = response.MessageID
 		if err := database.DB.Save(&message).Error; err != nil {
-			log.Printf("Error updating message %d: %v", message.ID, err)
+			err = errors.NewDatabaseError("Error updating message status", err).
+				WithMetadata("messageId", message.ID).
+				WithMetadata("webhookMessageId", response.MessageID)
+			errors.LogError(err)
 			logCronOperation("DATABASE_UPDATE", []uint{message.ID}, 1, false, fmt.Sprintf("DB update failed: %v", err))
 			continue
 		}
 
-		// Redis cache'e kaydet
 		cacheData := cache.MessageCache{
 			ID:        message.ID,
 			MessageID: response.MessageID,
@@ -170,7 +203,9 @@ func updateInactiveMessages() {
 			Phone:     message.Phone,
 		}
 		if err := cache.SetMessageCache(message.ID, cacheData); err != nil {
-			log.Printf("Warning: Failed to cache message %d: %v", message.ID, err)
+			err = errors.NewCacheError("Error caching message", err).
+				WithMetadata("messageId", message.ID)
+			errors.LogError(err)
 		}
 
 		log.Printf("Successfully updated message %d with message_id %s", message.ID, response.MessageID)
@@ -188,12 +223,15 @@ func StartCron() error {
 
 	schedule := os.Getenv("CRON_SCHEDULE")
 	if schedule == "" {
-		schedule = "*/30 * * * * *" // fallback schedule
+		schedule = "*/30 * * * * *"
 	}
 
 	var err error
 	entryID, err = cronJob.AddFunc(schedule, updateInactiveMessages)
 	if err != nil {
+		err = errors.NewCronError("Failed to start cron", err).
+			WithMetadata("schedule", schedule)
+		errors.LogError(err)
 		logCronOperation("START", nil, 0, false, fmt.Sprintf("Failed to start cron: %v", err))
 		return err
 	}
@@ -210,13 +248,16 @@ func StopCron() {
 	defer cronMutex.Unlock()
 
 	if !isRunning {
+		log.Println("Cron job is already stopped")
 		return
 	}
 
 	cronJob.Remove(entryID)
 	isRunning = false
-	logCronOperation("STOP", nil, 0, true, "Cron job stopped successfully")
-	log.Println("Cron job stopped")
+
+	description := fmt.Sprintf("Cron job stopped at %s", time.Now().Format(time.RFC3339))
+	logCronOperation("STOP", nil, 0, true, description)
+	log.Println(description)
 }
 
 func IsCronRunning() bool {

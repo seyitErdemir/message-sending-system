@@ -1,80 +1,89 @@
 # Message Sending System
 
-Modern bir mesajlaşma sistemi için Go tabanlı API projesi.
+A modern messaging system API developed with Go. This system sends and manages messages through scheduled tasks (cron jobs). Features:
 
-## Gereksinimler 🛠
+- RESTful API endpoints
+- Automatic API documentation with Swagger
+- Redis caching
+- MySQL database support
+- Scheduled message delivery
+- Easy setup and deployment with Docker
+- Database management with PHPMyAdmin and Redis Stack UI
+
+## Requirements 🛠
 
 - Go 1.16+
 - Docker & Docker Compose
-- Git
 
-## Hızlı Başlangıç 🚀
+## Installation and Running 🚀
 
-1. Projeyi klonlayın:
+### Running with Docker (Recommended)
 ```bash
+# Clone the project
 git clone <repository-url>
 cd message-sending-system
+
+# Start the application
+docker-compose up --build
 ```
 
-2. Geliştirme ortamını başlatın:
+### Local Development
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
-
-Uygulama http://localhost:3000 adresinde çalışmaya başlayacaktır.
-
-## Geliştirme Ortamı 💻
-
-### Docker ile Çalıştırma
-
-```bash
-# Geliştirme modunda başlatma
-docker-compose -f docker-compose.dev.yml up --build
-
-# Servisleri durdurma
-docker-compose down
-
-# Logları görüntüleme
-docker-compose logs -f
-```
-
-### Yerel Ortamda Çalıştırma
-
-```bash
-# Bağımlılıkları yükleme
+# Install dependencies
 go mod tidy
 
-# Hot-reload ile çalıştırma (Air kullanarak)
+# Run with hot-reload
 air
 ```
 
-## Proje Yapısı 📁
+## API Documentation 📚
+
+### Swagger
+```bash
+# Update Swagger documentation
+swag init -g cmd/api/main.go
+```
+
+### API Endpoints
+
+#### Message Operations
+- `POST /api/v1/messages` - Create new message
+- `GET /api/v1/messages` - List sent messages
+
+#### Cron Operations
+- `POST /cron/start` - Start message sending cron job
+- `POST /cron/stop` - Stop cron job
+- `GET /cron/status` - Check cron job status
+- `GET /cron/logs` - View cron logs
+
+## Management Interfaces 🖥
+
+### API Documentation
+Swagger UI: http://localhost:3000/swagger/index.html
+
+### Database Management
+PHPMyAdmin: http://localhost:8080
+
+### Redis Management
+Redis Stack UI: http://localhost:8001
+
+## Project Structure 📁
 
 ```
 .
-├── cmd/
-│   └── api/          # Ana uygulama
+├── cmd/api/      # Main application
 ├── pkg/
-│   ├── handlers/     # HTTP handlers
-│   ├── models/       # Veri modelleri
-│   └── database/     # Veritabanı işlemleri
-├── docker/          
-└── configs/          # Konfigürasyon dosyaları
+│   ├── handlers/ # HTTP handlers
+│   ├── models/   # Data models
+│   ├── database/ # Database operations
+│   └── cron/     # Scheduled tasks
+└── docker/       # Docker configurations
 ```
 
-## Ortam Değişkenleri 🔧
+## Environment Variables 🔧
 
-Farklı ortamlar için konfigürasyon dosyaları:
-- `.env.dev` - Geliştirme ortamı
-- `.env.test` - Test ortamı
-- `.env` - Lokal ortam
+The project uses the following environment variable files:
+- `.env` - Main environment variables
+- `.env.test` - Variables for test environment
 
-## Test 🧪
-
-```bash
-# Test ortamını ayarlama
-cp .env.test .env
-
-# Testleri çalıştırma
-go test -v ./... -env=test
-``` 
+All environment variables are shared openly, and no additional configuration is required to run the project.

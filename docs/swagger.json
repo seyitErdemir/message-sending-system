@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Bu API, mesaj gönderme ve yönetme işlemleri için kullanılır.",
+        "description": "This API is used for message sending and management operations.",
         "title": "Fiber Message API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -19,7 +19,7 @@
     "paths": {
         "/cron/logs": {
             "get": {
-                "description": "Cron job'ın çalışma loglarını getirir",
+                "description": "Retrieves the cron job execution logs",
                 "consumes": [
                     "application/json"
                 ],
@@ -29,16 +29,16 @@
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron loglarını getir",
+                "summary": "Get cron logs",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronLogsResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -48,7 +48,7 @@
         },
         "/cron/start": {
             "post": {
-                "description": "Mesaj gönderme cron job'ını başlatır",
+                "description": "Starts the message sending cron job",
                 "consumes": [
                     "application/json"
                 ],
@@ -58,16 +58,16 @@
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job'ı başlat",
+                "summary": "Start cron job",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronMessageResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -77,7 +77,7 @@
         },
         "/cron/status": {
             "get": {
-                "description": "Cron job'ın çalışıp çalışmadığını kontrol eder",
+                "description": "Checks if the cron job is running",
                 "consumes": [
                     "application/json"
                 ],
@@ -87,10 +87,10 @@
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job durumunu getir",
+                "summary": "Get cron job status",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronStatusResponse"
                         }
@@ -100,7 +100,7 @@
         },
         "/cron/stop": {
             "post": {
-                "description": "Mesaj gönderme cron job'ını durdurur",
+                "description": "Stops the message sending cron job",
                 "consumes": [
                     "application/json"
                 ],
@@ -110,10 +110,10 @@
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job'ı durdur",
+                "summary": "Stop cron job",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronMessageResponse"
                         }
@@ -123,7 +123,7 @@
         },
         "/messages": {
             "get": {
-                "description": "Veritabanındaki tüm mesajları getirir",
+                "description": "Retrieves messages from database where status is true (sent)",
                 "consumes": [
                     "application/json"
                 ],
@@ -133,16 +133,16 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "Tüm mesajları getir",
+                "summary": "Get all sent messages",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.MessagesResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -150,7 +150,7 @@
                 }
             },
             "post": {
-                "description": "Yeni bir mesaj oluşturur ve veritabanına kaydeder",
+                "description": "Creates a new message and saves it to the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -160,10 +160,10 @@
                 "tags": [
                     "messages"
                 ],
-                "summary": "Yeni mesaj oluştur",
+                "summary": "Create new message",
                 "parameters": [
                     {
-                        "description": "Mesaj bilgileri",
+                        "description": "Message information",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -174,13 +174,13 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Geçersiz istek",
+                        "description": "Invalid request",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -194,12 +194,12 @@
             "type": "object",
             "properties": {
                 "content": {
-                    "description": "Mesaj içeriği",
+                    "description": "Message content",
                     "type": "string",
-                    "example": "Merhaba, siparişiniz hazırlanıyor."
+                    "example": "Hello, your order is being prepared."
                 },
                 "phone": {
-                    "description": "Telefon numarası",
+                    "description": "Phone number",
                     "type": "string",
                     "example": "+905551234567"
                 }
@@ -209,14 +209,14 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Cron logları",
+                    "description": "Cron logs",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.CronLog"
                     }
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -226,12 +226,12 @@
             "type": "object",
             "properties": {
                 "message": {
-                    "description": "İşlem mesajı",
+                    "description": "Operation message",
                     "type": "string",
-                    "example": "Cron başlatıldı"
+                    "example": "Cron started"
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -241,12 +241,12 @@
             "type": "object",
             "properties": {
                 "is_running": {
-                    "description": "Cron job çalışma durumu",
+                    "description": "Cron job running status",
                     "type": "boolean",
                     "example": true
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -256,17 +256,17 @@
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "Hata kodu",
+                    "description": "Error code",
                     "type": "string",
                     "example": "CONTENT_REQUIRED"
                 },
                 "message": {
-                    "description": "Hata mesajı",
+                    "description": "Error message",
                     "type": "string",
-                    "example": "Content alanı zorunludur"
+                    "example": "Content field required"
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "failed"
                 }
@@ -276,7 +276,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Mesaj verisi",
+                    "description": "Message data",
                     "allOf": [
                         {
                             "$ref": "#/definitions/models.Message"
@@ -284,7 +284,7 @@
                     ]
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -294,14 +294,14 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Mesaj listesi",
+                    "description": "Message list",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Message"
                     }
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }

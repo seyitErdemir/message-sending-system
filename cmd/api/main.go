@@ -16,7 +16,7 @@ import (
 
 // @title Fiber Message API
 // @version 1.0
-// @description Bu API, mesaj gönderme ve yönetme işlemleri için kullanılır.
+// @description This API is used for message sending and management operations.
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name API Destek
@@ -36,12 +36,11 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Redis bağlantısını başlat
+	// Initialize Redis connection
 	if err := cache.Connect(); err != nil {
 		log.Printf("Warning: Failed to initialize Redis: %v", err)
 	}
 
-	// Swagger endpoint'i
 	app.Get("/swagger/*", swagger.New(swagger.Config{
 		URL:         "/swagger/doc.json",
 		DeepLinking: true,

@@ -9,6 +9,13 @@
 
 # Environment files
 .env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+!.env.example
 
 # IDE specific files
 .idea/

@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/cron/logs": {
             "get": {
-                "description": "Cron job'ın çalışma loglarını getirir",
+                "description": "Retrieves the cron job execution logs",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,16 +35,16 @@ const docTemplate = `{
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron loglarını getir",
+                "summary": "Get cron logs",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronLogsResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -54,7 +54,7 @@ const docTemplate = `{
         },
         "/cron/start": {
             "post": {
-                "description": "Mesaj gönderme cron job'ını başlatır",
+                "description": "Starts the message sending cron job",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,16 +64,16 @@ const docTemplate = `{
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job'ı başlat",
+                "summary": "Start cron job",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronMessageResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -83,7 +83,7 @@ const docTemplate = `{
         },
         "/cron/status": {
             "get": {
-                "description": "Cron job'ın çalışıp çalışmadığını kontrol eder",
+                "description": "Checks if the cron job is running",
                 "consumes": [
                     "application/json"
                 ],
@@ -93,10 +93,10 @@ const docTemplate = `{
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job durumunu getir",
+                "summary": "Get cron job status",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronStatusResponse"
                         }
@@ -106,7 +106,7 @@ const docTemplate = `{
         },
         "/cron/stop": {
             "post": {
-                "description": "Mesaj gönderme cron job'ını durdurur",
+                "description": "Stops the message sending cron job",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,10 +116,10 @@ const docTemplate = `{
                 "tags": [
                     "cron"
                 ],
-                "summary": "Cron job'ı durdur",
+                "summary": "Stop cron job",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.CronMessageResponse"
                         }
@@ -129,7 +129,7 @@ const docTemplate = `{
         },
         "/messages": {
             "get": {
-                "description": "Veritabanındaki tüm mesajları getirir",
+                "description": "Retrieves messages from database where status is true (sent)",
                 "consumes": [
                     "application/json"
                 ],
@@ -139,16 +139,16 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "Tüm mesajları getir",
+                "summary": "Get all sent messages",
                 "responses": {
                     "200": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.MessagesResponse"
                         }
                     },
                     "500": {
-                        "description": "Sunucu hatası",
+                        "description": "Server error",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -156,7 +156,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Yeni bir mesaj oluşturur ve veritabanına kaydeder",
+                "description": "Creates a new message and saves it to the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -166,10 +166,10 @@ const docTemplate = `{
                 "tags": [
                     "messages"
                 ],
-                "summary": "Yeni mesaj oluştur",
+                "summary": "Create new message",
                 "parameters": [
                     {
-                        "description": "Mesaj bilgileri",
+                        "description": "Message information",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -180,13 +180,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Başarılı yanıt",
+                        "description": "Successful response",
                         "schema": {
                             "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     },
                     "400": {
-                        "description": "Geçersiz istek",
+                        "description": "Invalid request",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -200,12 +200,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
-                    "description": "Mesaj içeriği",
+                    "description": "Message content",
                     "type": "string",
-                    "example": "Merhaba, siparişiniz hazırlanıyor."
+                    "example": "Hello, your order is being prepared."
                 },
                 "phone": {
-                    "description": "Telefon numarası",
+                    "description": "Phone number",
                     "type": "string",
                     "example": "+905551234567"
                 }
@@ -215,14 +215,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Cron logları",
+                    "description": "Cron logs",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.CronLog"
                     }
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -232,12 +232,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
-                    "description": "İşlem mesajı",
+                    "description": "Operation message",
                     "type": "string",
-                    "example": "Cron başlatıldı"
+                    "example": "Cron started"
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -247,12 +247,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "is_running": {
-                    "description": "Cron job çalışma durumu",
+                    "description": "Cron job running status",
                     "type": "boolean",
                     "example": true
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -262,17 +262,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "Hata kodu",
+                    "description": "Error code",
                     "type": "string",
                     "example": "CONTENT_REQUIRED"
                 },
                 "message": {
-                    "description": "Hata mesajı",
+                    "description": "Error message",
                     "type": "string",
-                    "example": "Content alanı zorunludur"
+                    "example": "Content field required"
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "failed"
                 }
@@ -282,7 +282,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Mesaj verisi",
+                    "description": "Message data",
                     "allOf": [
                         {
                             "$ref": "#/definitions/models.Message"
@@ -290,7 +290,7 @@ const docTemplate = `{
                     ]
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -300,14 +300,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "description": "Mesaj listesi",
+                    "description": "Message list",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Message"
                     }
                 },
                 "status": {
-                    "description": "İşlem durumu",
+                    "description": "Operation status",
                     "type": "string",
                     "example": "success"
                 }
@@ -378,7 +378,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Fiber Message API",
-	Description:      "Bu API, mesaj gönderme ve yönetme işlemleri için kullanılır.",
+	Description:      "This API is used for message sending and management operations.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

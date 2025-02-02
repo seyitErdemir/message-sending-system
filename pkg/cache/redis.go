@@ -46,7 +46,7 @@ func SetMessageCache(messageID uint, data MessageCache) error {
 		return fmt.Errorf("failed to marshal message data: %v", err)
 	}
 
-	// 1 saat süreyle cache'te tutuyoruz
+	// Store in cache for 1 hour
 	err = RedisClient.Set(Ctx, key, jsonData, time.Hour).Err()
 	if err != nil {
 		return fmt.Errorf("failed to set message cache: %v", err)
@@ -59,7 +59,34 @@ func GetMessageCache(messageID uint) (*MessageCache, error) {
 	key := fmt.Sprintf("message:%d", messageID)
 	data, err := RedisClient.Get(Ctx, key).Result()
 	if err == redis.Nil {
-		return nil, nil // Cache'de yok
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("failed to get message cache: %v", err)
+	}
+
+	var message MessageCache
+	if err := json.Unmarshal([]byte(data), &message); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal message data: %v", err)
+	}
+
+	return &message, nil
+}
+
+// GetMessageCacheWithTimeout gets a message from cache with a timeout
+func GetMessageCacheWithTimeout(messageID uint) (*MessageCache, error) {
+	// Create a new context with 5 seconds timeout
+	ctx, cancel := context.WithTimeout(Ctx, time.Second*5)
+	// Clean up context when operation is done
+	defer cancel()
+
+	key := fmt.Sprintf("message:%d", messageID)
+
+	data, err := RedisClient.Get(ctx, key).Result()
+
+	if err == redis.Nil {
+		return nil, nil
+	} else if err == context.DeadlineExceeded {
+		return nil, fmt.Errorf("redis operation timed out after 5 seconds")
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to get message cache: %v", err)
 	}
