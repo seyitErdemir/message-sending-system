@@ -63,9 +63,7 @@ func logCronOperation(operation string, messageIDs []uint, count int, status boo
 func updateInactiveMessages() {
 	var messages []models.Message
 
-	batchSize := 2
-
-	result := database.DB.Where("status = ?", false).Order("created_at asc").Limit(batchSize).Find(&messages)
+	result := database.DB.Where("status = ?", false).Order("created_at asc").Limit(2).Find(&messages)
 	if result.Error != nil {
 		err := errors.NewDatabaseError("Error fetching inactive messages", result.Error)
 		errors.LogError(err)
