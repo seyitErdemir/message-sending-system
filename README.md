@@ -47,8 +47,8 @@ swag init -g cmd/api/main.go
 ### API Endpoints
 
 #### Message Operations
-- `POST /api/v1/messages` - Create new message
-- `GET /api/v1/messages` - List sent messages
+- `POST /api/messages` - Create new message
+- `GET /api/messages` - List sent messages
 
 #### Cron Operations
 - `POST /cron/start` - Start message sending cron job
